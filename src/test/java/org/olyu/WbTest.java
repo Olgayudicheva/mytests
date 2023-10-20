@@ -45,7 +45,7 @@ public class WbTest {
 
     String tokenAut = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2OTc3MTQ3MTQsInZlcnNpb24iOjIsInVzZXIiOiIxNTI1NzcwNSIsInNoYXJkX2tleSI6IjI3IiwiY2xpZW50X2lkIjoid2IiLCJzZXNzaW9uX2lkIjoiZTNiNzdhY2RmMWIwNDgzNzg5OTQ2MWEwMjM4MGE0NjAiLCJ1c2VyX3JlZ2lzdHJhdGlvbl9kdCI6MTY3MDQ4OTg0MywidmFsaWRhdGlvbl9rZXkiOiJiMjE5NjBkNGE4NjUyYmEzOGMyM2JhNDYyMzMxNWEwOGNlZDZiOWYzOThiNjYyYTU0MzlhNDA2MmZlMjBlMDliIiwicGhvbmUiOiJ0dWVaT291L0JCSnRHbi9DM0I5RVVBPT0ifQ.KXTROp8PoI2qtWw3zD9Wq-CnsqZz_MXqmpTdQa9Yemvyj0OZmS_p0WOwNL33N78LP7RISRhq5uIJUI_Jyy3jMadAnyejxtjxSaBwBNjIy77C5-Bodfgu6gvwRDh3dFxCOMpHJcMKZYsltLw1iQYMIYuLcok4ys0__wt7ruKWdRBRdNa2xS8xoLGantlxDHAvHGFgtKki-_roqa8VC76Xl1y3nuU-2BuxymCgOrgpxuwqUV8jtXXk30QrFzUWuhhjvbmivhOGIkpArKkYgEL3kZAfqRVjwjcZCmzQIOinD1CYDnyhrxX3JVn90I5RZBqKjbzglA4khIxTkOVIw8pOuw";
     By.ByXPath searchXpath = new By.ByXPath("//*[@id=\"searchInput\"]");
-    By.ByXPath addToCart1 = new By.ByXPath("/html/body/div[1]/main/div[2]/div/div[3]/div/div[3]/div[10]/div[1]/div/button[2]");
+    By.ByXPath addToCart1 = new By.ByXPath("/html/body/div[1]/main/div[2]/div/div[3]/div/div[3]/div[11]/div/div[1]/div[3]/div/button[2]");
     By.ByXPath clickOnPopularName = new By.ByXPath("//*[@id=\"catalog\"]/div/div[2]/div/section/ul/li[2]");
    //сортировка товаров
     By.ByXPath sorting = new By.ByXPath("/html/body/div[1]/main/div[2]/div/div[2]/div/div/div[3]/div/div/div/div/div[1]/div[2]");
@@ -55,7 +55,9 @@ public class WbTest {
     By.ByXPath priceFrom = new By.ByXPath("/html/body/div[1]/main/div[2]/div/div[2]/div/div/div[3]/div/div/div/div/div[1]/div[7]/div/div[1]/div/div[1]/div/label/input");
     By.ByXPath priceUpTo = new By.ByXPath("/html/body/div[1]/main/div[2]/div/div[2]/div/div/div[3]/div/div/div/div/div[1]/div[7]/div/div[1]/div/div[2]/div/label/input");
     By.ByXPath done = new By.ByXPath("/html/body/div[1]/main/div[2]/div/div[2]/div/div/div[3]/div/div/div/div/div[1]/div[7]/div/div[2]/button[2]");
-
+    //  XPath выбора доступного размера. [not(contains(@class,'disabled'))] - отсекает значения, у которых в классе есть disabled
+    By.ByXPath availableSize = new By.ByXPath("//*[@class=\"product-page__sizes-wrap\"]/*/li[@class=\"sizes-list__item\"]/label[not(contains(@class,'disabled'))]/..");
+    By.ByXPath allSize = new By.ByXPath("//*[@class=\"product-page__sizes-wrap\"]/*/li[@class=\"sizes-list__item\"]/label/..");
     @Test
     void testFirst() throws InterruptedException {
         ChromeOptions options = new ChromeOptions();
@@ -63,9 +65,9 @@ public class WbTest {
         driver = new ChromeDriver(options);
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 //1. ввод артикула товара в поисковую строку, открытие карточки товара (товар без размерного ряда) и добавление его в корзину
-        driver.get("https://wildberries.ru");
+       driver.get("https://wildberries.ru");
         Thread.sleep(1000);
-        wait.until(ExpectedConditions.presenceOfElementLocated(searchXpath));
+        wait.until(ExpectedConditions.visibilityOfElementLocated(searchXpath));
         wait.until(ExpectedConditions.elementToBeClickable(searchXpath)).click();
         driver.findElement(searchXpath).sendKeys("87286001");
         driver.findElement(searchXpath).sendKeys(Keys.ENTER);
@@ -107,10 +109,26 @@ public class WbTest {
         wait.until(ExpectedConditions.elementToBeClickable(done)).click();
         Thread.sleep(3000);
         //2.4 открываем рандомный товар
-        List<WebElement> list = driver.findElements(By.xpath("/html/body/div[1]/main/div[2]/div/div[2]/div/div/div[4]/div[1]/div[1]/div/article"));
+        //List<WebElement> list = driver.findElements(By.xpath("/html/body/div[1]/main/div[2]/div/div[2]/div/div/div[4]/div[1]/div[1]/div/article"));
+        List<WebElement> list = driver.findElements(By.xpath("//*[@class=\"product-card-list\"]/article"));
         Random rand = new Random();
         WebElement randomElement = list.get(rand.nextInt(list.size()));
-        randomElement.click();
+        new Actions(driver).scrollToElement(randomElement).moveToElement(randomElement).click().perform();//скролим страницу до элемента(карточки товара), двигаем мышь, кликаем на карточку товара
+    //2.5 выбираем доступный размер товара и добавляем товар в корзину
+        Thread.sleep(1000);
+        wait.until(ExpectedConditions.visibilityOfElementLocated(allSize)); //ждем когда на экране появится хотя бы один размер
+        List<WebElement> availableSizeList = driver.findElements(availableSize);
+        //если отсутствует элемент выбора размера, то покидаем страницу и открываем другой товар
+        /*if (availableSizeList.size()==0){
+            driver.navigate().back();
+        }*/
+        WebElement randomSize = availableSizeList.get(rand.nextInt(availableSizeList.size()));
+        System.out.println(randomSize.getText());
+        Thread.sleep(500);
+        new Actions(driver).moveToElement(randomSize).click().perform();//двигаем мышью к элементу(размер футболки), и кликаем на него
+        Thread.sleep(500);
+        wait.until(ExpectedConditions.presenceOfElementLocated(addToCart1));
+        wait.until(ExpectedConditions.elementToBeClickable(addToCart1)).click();
 
         Thread.sleep(10000);
 

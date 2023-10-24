@@ -58,6 +58,8 @@ public class WbTest {
     //  XPath выбора доступного размера. [not(contains(@class,'disabled'))] - отсекает значения, у которых в классе есть disabled
     By.ByXPath availableSize = new By.ByXPath("//*[@class=\"product-page__sizes-wrap\"]/*/li[@class=\"sizes-list__item\"]/label[not(contains(@class,'disabled'))]/..");
     By.ByXPath allSize = new By.ByXPath("//*[@class=\"product-page__sizes-wrap\"]/*/li[@class=\"sizes-list__item\"]/label/..");
+    By.ByXPath openCart = new By.ByXPath("/html/body/div[1]/header/div/div[2]/div[2]/div[3]/a");
+    By.ByXPath elementsInCart = new By.ByXPath("//div[contains(@class,'list-item__good-info')]/a");
     @Test
     void testFirst() throws InterruptedException {
         ChromeOptions options = new ChromeOptions();
@@ -117,11 +119,14 @@ public class WbTest {
     //2.5 выбираем доступный размер товара и добавляем товар в корзину
         Thread.sleep(1000);
         wait.until(ExpectedConditions.visibilityOfElementLocated(allSize)); //ждем когда на экране появится хотя бы один размер
+        //урл страницы с рандомной футболкой, которую добавляем в корзину
+        String urlMaiki = driver.getCurrentUrl();
         List<WebElement> availableSizeList = driver.findElements(availableSize);
         //если отсутствует элемент выбора размера, то покидаем страницу и открываем другой товар
-        /*if (availableSizeList.size()==0){
+        if (availableSizeList.size()==0){
             driver.navigate().back();
-        }*/
+        }
+
         WebElement randomSize = availableSizeList.get(rand.nextInt(availableSizeList.size()));
         System.out.println(randomSize.getText());
         Thread.sleep(500);
@@ -130,7 +135,25 @@ public class WbTest {
         wait.until(ExpectedConditions.presenceOfElementLocated(addToCart1));
         wait.until(ExpectedConditions.elementToBeClickable(addToCart1)).click();
 
-        Thread.sleep(10000);
+        //открываем корзину и проверяем добавленный товар
+        wait.until(ExpectedConditions.presenceOfElementLocated(openCart));
+        wait.until(ExpectedConditions.elementToBeClickable(openCart)).click();
+        wait.until(ExpectedConditions.visibilityOfElementLocated(elementsInCart));
+        List<WebElement> elementInCartList = driver.findElements(elementsInCart);
+        int exeptedElementInCartSize = 2;
+        //проверка что в корзине нужное количество товаров, если нет, то тест падает и выводится сообщение
+        assert elementInCartList.size()==exeptedElementInCartSize : "в неверное количество товара, ожидается "+exeptedElementInCartSize+", фактически "+elementInCartList.size();
+        /*функция перебора элементов(товаров) в списке если нужно
+        for (WebElement webElement : elementInCartList) {
+            webElement.
+        }*/
+        //проверяем имеется ли в корзине футболка
+        assert elementInCartList.get(0).getAttribute("href").contains(urlMaiki);
+        //проверяем есть ли в корзине опрыскиватель
+        assert elementInCartList.get(1).getAttribute("href").contains("/catalog/87286001/detail");
+
+
+        Thread.sleep(1000);
 
 
 

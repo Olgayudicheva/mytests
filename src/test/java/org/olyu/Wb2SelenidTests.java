@@ -28,7 +28,7 @@ public class Wb2SelenidTests {
     By autoCompleteSearchElementXpath = By.xpath("//span[@class='autocomplete__icon loupe']/../span[@class='autocomplete__phrase']");
 
     //Ищем элемент с классом autocomplete__phrase, рядом с которым есть элемент с классом autocomplete__icon и loupe, через CssSelector
-    String autoCompleteSearchElementCss = ".autocomplete__text:has(span.autocomplete__icon.loupe)>.autocomplete__phrase";
+    String autoCompleteSearchElementCss = "span.autocomplete__icon.loupe~.autocomplete__phrase";
 
     private static Stream<Arguments> testFirstAutoCompleteElementData() {
         return Stream.of(

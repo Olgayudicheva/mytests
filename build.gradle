@@ -24,8 +24,19 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testImplementation "io.qameta.allure:allure-selenide:2.24.0"
     testImplementation "io.qameta.allure:allure-junit5:2.24.0"
-}
+    testImplementation 'io.appium:java-client:9.0.0'
+    }
 
 test {
     useJUnitPlatform()
+}
+
+task testRemoute(type: Test) {
+    useJUnitPlatform()
+    systemProperty("selenide.remote", "http://192.168.1.69:4445")
+    systemProperty("selenide.browserSize","1920x1080")
+    filter {
+        includeTestsMatching("Wb2SelenidTests")
+        includeTestsMatching("CreditCalcTests")
+    }
 }
